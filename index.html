@@ -3,89 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Android 16 MD3 Edition</title>
+    <title>Android 16 Pro - MD3 Fixed</title>
     <style>
         :root {
-            /* MD3 标准配色 - 莫兰迪蓝/紫 */
-            --md-surface: #f7f9ff;
-            --md-on-surface: #191c20;
-            --md-primary-container: #dce2f9;
-            --md-on-primary-container: #151b2c;
-            --md-secondary-container: #e1e2ec;
-            --md-outline: #74777f;
-            --android-ease: cubic-bezier(0.2, 0.0, 0, 1.0);
-            --wallpaper: linear-gradient(180deg, #bbdefb 0%, #e1bee7 100%);
+            --md-surface: #f3f4f9;
+            --md-primary: #005ac1;
+            --md-sec-container: #e1e2ec;
+            --android-ease: cubic-bezier(0.2, 0, 0, 1);
+            --wallpaper: linear-gradient(160deg, #a5f3fc, #ddd6fe, #fbcfe8);
         }
 
-        body { margin: 0; height: 100vh; background: #000; display: flex; justify-content: center; align-items: center; font-family: 'Segoe UI', system-ui; overflow: hidden; }
+        body { margin: 0; height: 100vh; background: #000; display: flex; justify-content: center; align-items: center; font-family: 'Inter', system-ui, -apple-system; overflow: hidden; touch-action: none; }
         
         #phone { 
             width: 100vw; height: 100vh; max-width: 430px; max-height: 932px; 
-            background: var(--md-surface); position: relative; overflow: hidden; border-radius: 32px; 
+            background: #000; position: relative; overflow: hidden; border-radius: 36px; 
         }
 
-        /* --- 桌面 --- */
+        /* --- 桌面布局修复 --- */
         #home { 
             position: absolute; inset: 0; background: var(--wallpaper); 
-            padding: 70px 24px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+            padding: 80px 24px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 25px;
             transition: transform 0.6s var(--android-ease), filter 0.6s;
         }
 
-        .icon-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .icon-box { 
-            width: 64px; height: 64px; background: rgba(255,255,255,0.4); 
-            backdrop-filter: blur(10px); border-radius: 20px; 
-            display: flex; justify-content: center; align-items: center; font-size: 32px;
+        .icon-item { 
+            width: calc(25% - 20px); display: flex; flex-direction: column; align-items: center; cursor: pointer; 
         }
-        .icon-label { color: #1c1b1f; font-size: 12px; margin-top: 8px; font-weight: 500; }
 
-        /* --- 通用应用窗口 (MD3 风格) --- */
+        /* MD3 风格图标容器 */
+        .icon-box { 
+            width: 64px; height: 64px; border-radius: 20px; 
+            display: flex; justify-content: center; align-items: center; font-size: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .icon-box:active { transform: scale(0.9); }
+
+        /* 不同应用的图标颜色 */
+        .cam-bg { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); }
+        .set-bg { background: #dce2f9; color: #001d35; } /* MD3 标准设置色 */
+
+        .icon-label { color: #1c1b1f; font-size: 12px; margin-top: 8px; font-weight: 600; text-align: center; }
+
+        /* --- 应用窗口 --- */
         .app-window {
             position: absolute; inset: 0; background: var(--md-surface); 
-            z-index: 1000; display: none; flex-direction: column; transform-origin: center;
+            z-index: 1000; display: none; flex-direction: column; 
+            transform: translateY(100%); transition: transform 0.5s var(--android-ease);
         }
+        .app-window.active { display: flex; transform: translateY(0); }
 
-        /* --- 设置界面 (MD3 核心) --- */
-        #settings-content { padding: 20px; color: var(--md-on-surface); overflow-y: auto; }
-        .md-title { font-size: 32px; margin: 40px 0 24px 10px; font-weight: 400; }
+        /* --- MD3 设置详情 --- */
+        .settings-header { padding: 48px 24px 16px; font-size: 32px; font-weight: 400; color: #191c20; }
+        .settings-list { padding: 0 16px; overflow-y: auto; }
         
         .md-card {
-            background: var(--md-secondary-container);
-            border-radius: 28px; padding: 20px; margin-bottom: 16px;
+            background: #e7e0ec; border-radius: 28px; padding: 24px; margin: 8px;
             display: flex; align-items: center; gap: 16px;
         }
 
-        .md-list-item {
-            padding: 16px 12px; display: flex; align-items: center; justify-content: space-between;
-            border-radius: 12px; transition: background 0.2s;
+        .md-item {
+            padding: 16px 20px; margin: 4px 0; border-radius: 16px;
+            display: flex; align-items: center; justify-content: space-between;
         }
-        .md-list-item:active { background: rgba(0,0,0,0.05); }
-        .list-info { display: flex; flex-direction: column; }
-        .list-info span:first-child { font-size: 16px; font-weight: 500; }
-        .list-info span:last-child { font-size: 13px; color: #44474e; }
-
-        /* MD3 开关组件 */
-        .md-switch {
-            width: 52px; height: 32px; background: var(--md-outline);
-            border-radius: 16px; position: relative; transition: 0.3s;
-        }
-        .md-switch::after {
-            content: ''; position: absolute; top: 4px; left: 4px;
-            width: 24px; height: 24px; background: #fff; border-radius: 50%; transition: 0.3s;
-        }
-        .md-switch.active { background: #3461ff; }
-        .md-switch.active::after { left: 24px; }
+        .md-item:active { background: rgba(0,0,0,0.05); }
 
         /* --- 相机界面 --- */
-        #camera-view { width: 100%; height: 75%; object-fit: cover; background: #000; border-radius: 0 0 32px 32px; }
-        .cam-controls { flex: 1; display: flex; justify-content: space-around; align-items: center; background: #000; }
+        #v { width: 100%; height: 75%; object-fit: cover; background: #000; }
+        .cam-bottom { flex: 1; display: flex; justify-content: space-around; align-items: center; background: #000; }
         .shutter { width: 72px; height: 72px; border-radius: 50%; border: 4px solid #fff; display: flex; justify-content: center; align-items: center; }
-        .shutter-in { width: 56px; height: 56px; background: #fff; border-radius: 50%; }
+        .shutter-inner { width: 56px; height: 56px; background: #fff; border-radius: 50%; }
 
-        /* 导航条 */
         #nav-bar {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            width: 100px; height: 4px; background: #000; opacity: 0.2; border-radius: 2px; z-index: 2000;
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 5px; background: rgba(0,0,0,0.2); border-radius: 10px; z-index: 2001;
         }
     </style>
 </head>
@@ -94,56 +85,52 @@
 <div id="phone">
     <div id="home">
         <div class="icon-item" onclick="openApp('camera')">
-            <div class="icon-box">📷</div><div class="icon-label">相机</div>
+            <div class="icon-box cam-bg">📷</div>
+            <div class="icon-label">相机</div>
         </div>
         <div class="icon-item" onclick="openApp('settings')">
-            <div class="icon-box">⚙️</div><div class="icon-label">设置</div>
+            <div class="icon-box set-bg">⚙️</div>
+            <div class="icon-label">设置</div>
         </div>
     </div>
 
     <div id="settings-app" class="app-window">
-        <div id="settings-content">
-            <h1 class="md-title">设置</h1>
-            
+        <div class="settings-header">设置</div>
+        <div class="settings-list">
             <div class="md-card">
-                <div style="font-size: 24px;">👤</div>
-                <div class="list-info">
-                    <span>Google 账号</span>
-                    <span>Android 16 测试用户</span>
+                <div style="font-size: 30px;">👤</div>
+                <div>
+                    <div style="font-weight:500;">Google 账号</div>
+                    <div style="font-size:13px; opacity:0.7;">laowu@android16.test</div>
                 </div>
             </div>
-
-            <div class="md-list-item">
-                <div class="list-info">
-                    <span>网络与互联网</span>
-                    <span>WLAN, 移动网络, 热点</span>
+            <div class="md-item">
+                <div>
+                    <div style="font-weight:500;">连接</div>
+                    <div style="font-size:13px; opacity:0.7;">WLAN, 蓝牙, 飞行模式</div>
                 </div>
-                <span>📶</span>
+                <span>〉</span>
             </div>
-
-            <div class="md-list-item" onclick="toggleSwitch(this)">
-                <div class="list-info">
-                    <span>深色模式</span>
-                    <span>当前为浅色模式</span>
+            <div class="md-item">
+                <div>
+                    <div style="font-weight:500;">显示</div>
+                    <div style="font-size:13px; opacity:0.7;">亮度, 字体大小, 屏幕超时</div>
                 </div>
-                <div class="md-switch"></div>
+                <span>〉</span>
             </div>
-
-            <div class="md-list-item">
-                <div class="list-info">
-                    <span>关于手机</span>
-                    <span>Android 16 - Build Pro</span>
-                </div>
+            <div class="md-item">
+                <div style="font-weight:500;">关于手机</div>
+                <span>v16.0.1</span>
             </div>
         </div>
     </div>
 
     <div id="camera-app" class="app-window" style="background:#000;">
         <video id="v" autoplay playsinline muted></video>
-        <div class="cam-controls">
-            <div style="width:50px; height:50px; background:#333; border-radius:10px;" id="prev"></div>
-            <div class="shutter" onclick="snap()"><div class="shutter-in"></div></div>
-            <div style="color:white; font-size:24px;" onclick="switchCam()">🔄</div>
+        <div class="cam-bottom">
+            <div style="width:48px; height:48px; background:#333; border-radius:8px;" id="gallery-prev"></div>
+            <div class="shutter" onclick="takePhoto()"><div class="shutter-inner"></div></div>
+            <div style="color:white; font-size:28px;" onclick="switchCamera()">🔄</div>
         </div>
     </div>
 
@@ -151,73 +138,61 @@
 </div>
 
 <script>
-    let stream = null;
+    let activeStream = null;
     let isRear = true;
-    let currentAnim = null;
 
-    // --- 应用管理 ---
-    function openApp(id) {
-        const win = document.getElementById(id + '-app');
+    function openApp(name) {
         const home = document.getElementById('home');
+        const app = document.getElementById(name + '-app');
         
-        win.style.display = 'flex';
-        home.style.transform = 'scale(0.9)';
-        home.style.filter = 'blur(10px)';
+        app.style.display = 'flex';
+        // 强制重绘
+        app.offsetHeight; 
+        app.classList.add('active');
 
-        currentAnim = win.animate([
-            { transform: 'translateY(100%)', opacity: 0 },
-            { transform: 'translateY(0)', opacity: 1 }
-        ], { duration: 400, easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)', fill: 'forwards' });
+        home.style.transform = 'scale(0.92)';
+        home.style.filter = 'blur(15px) brightness(0.8)';
 
-        if(id === 'camera') startCam();
+        if(name === 'camera') startCamera();
     }
 
     function closeAll() {
-        const apps = document.querySelectorAll('.app-window');
         const home = document.getElementById('home');
+        const apps = document.querySelectorAll('.app-window');
         
         apps.forEach(app => {
-            if(app.style.display === 'flex') {
-                const anim = app.animate([
-                    { transform: 'translateY(0)', opacity: 1 },
-                    { transform: 'translateY(100%)', opacity: 0 }
-                ], { duration: 300, easing: 'ease-in' });
-
-                anim.onfinish = () => {
-                    app.style.display = 'none';
-                    home.style.transform = 'scale(1)';
-                    home.style.filter = 'none';
-                    if(stream) stream.getTracks().forEach(t => t.stop());
-                };
-            }
+            app.classList.remove('active');
+            setTimeout(() => { app.style.display = 'none'; }, 500);
         });
+
+        home.style.transform = 'scale(1)';
+        home.style.filter = 'none';
+
+        if(activeStream) {
+            activeStream.getTracks().forEach(t => t.stop());
+            activeStream = null;
+        }
     }
 
-    // --- 设置交互 ---
-    function toggleSwitch(el) {
-        const sw = el.querySelector('.md-switch');
-        sw.classList.toggle('active');
-    }
-
-    // --- 相机逻辑 ---
-    async function startCam() {
+    async function startCamera() {
         try {
-            stream = await navigator.mediaDevices.getUserMedia({
+            activeStream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: isRear ? "environment" : "user" }
             });
-            document.getElementById('v').srcObject = stream;
-        } catch(e) { console.log("相机开启失败，请检查域名权限"); }
+            document.getElementById('v').srcObject = activeStream;
+        } catch(e) { console.error("Camera fail"); }
     }
 
-    function snap() {
+    function takePhoto() {
         const v = document.getElementById('v');
         const canvas = document.createElement('canvas');
         canvas.width = v.videoWidth; canvas.height = v.videoHeight;
         canvas.getContext('2d').drawImage(v, 0, 0);
-        document.getElementById('prev').innerHTML = `<img src="${canvas.toDataURL()}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+        const data = canvas.toDataURL();
+        document.getElementById('gallery-prev').innerHTML = `<img src="${data}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
     }
 
-    function switchCam() { isRear = !isRear; startCam(); }
+    function switchCamera() { isRear = !isRear; startCamera(); }
 </script>
 </body>
 </html>
