@@ -3,75 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Android 16 Pro</title>
+    <title>Android 16 Pro - Fix</title>
     <style>
         :root {
             --android-ease: cubic-bezier(0.1, 0.8, 0.2, 1);
             --wallpaper: linear-gradient(160deg, #1e3a8a, #7e22ce, #db2777);
         }
-
-        body {
-            margin: 0; height: 100vh; background: #000;
-            display: flex; justify-content: center; align-items: center;
-            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            overflow: hidden; touch-action: none;
-        }
-
-        #phone {
-            width: 100vw; height: 100vh;
-            max-width: 430px; max-height: 932px;
-            background: #000; position: relative; overflow: hidden;
-            border: 4px solid #333; border-radius: 40px;
-        }
-
+        body { margin: 0; height: 100vh; background: #000; display: flex; justify-content: center; align-items: center; font-family: sans-serif; overflow: hidden; touch-action: none; }
+        #phone { width: 100vw; height: 100vh; max-width: 430px; max-height: 932px; background: #000; position: relative; overflow: hidden; border-radius: 40px; }
+        
         /* 桌面 */
-        #home {
-            position: absolute; inset: 0; background: var(--wallpaper);
-            padding: 60px 20px; display: grid; 
-            grid-template-columns: repeat(4, 1fr); grid-auto-rows: 90px;
-            transition: transform 0.6s var(--android-ease), filter 0.6s;
-        }
-
+        #home { position: absolute; inset: 0; background: var(--wallpaper); padding: 60px 20px; display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 90px; transition: transform 0.6s var(--android-ease), filter 0.6s; }
         .app-icon { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .icon-box {
-            width: 60px; height: 60px; background: rgba(255,255,255,0.25);
-            backdrop-filter: blur(15px); border-radius: 18px;
-            display: flex; justify-content: center; align-items: center; font-size: 32px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+        .icon-box { width: 60px; height: 60px; background: rgba(255,255,255,0.25); backdrop-filter: blur(15px); border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 32px; }
 
         /* 相机界面 */
-        #camera-app {
-            position: absolute; inset: 0; background: #000;
-            z-index: 1000; display: none; flex-direction: column;
-            transform-origin: center;
-        }
+        #camera-app { position: absolute; inset: 0; background: #000; z-index: 1000; display: none; flex-direction: column; transform-origin: center; }
+        video { width: 100%; height: 75%; object-fit: cover; background: #222; }
+        
+        /* 强制激活按钮 (当自动启动失败时显示) */
+        #auth-btn { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); padding: 15px 30px; background: #fff; color: #000; border-radius: 30px; font-weight: bold; display: none; z-index: 1100; }
 
-        video { width: 100%; height: 75%; object-fit: cover; }
-
-        .controls {
-            flex: 1; display: flex; justify-content: space-around; 
-            align-items: center; padding: 20px; background: #000;
-        }
-
-        .shutter {
-            width: 70px; height: 70px; border-radius: 50%;
-            border: 4px solid white; display: flex; justify-content: center; align-items: center;
-        }
+        .controls { flex: 1; display: flex; justify-content: space-around; align-items: center; padding: 20px; background: #000; }
+        .shutter { width: 70px; height: 70px; border-radius: 50%; border: 4px solid white; display: flex; justify-content: center; align-items: center; }
         .shutter-inner { width: 56px; height: 56px; background: white; border-radius: 50%; }
-
-        #prev-box {
-            width: 50px; height: 50px; border-radius: 10px;
-            background: #222; overflow: hidden; border: 1px solid #444;
-        }
+        #prev-box { width: 50px; height: 50px; border-radius: 10px; background: #333; overflow: hidden; }
         #prev-box img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* 手势条 */
-        #nav-bar {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            width: 120px; height: 5px; background: rgba(255,255,255,0.5);
-            border-radius: 10px; z-index: 2001; cursor: pointer;
-        }
+        #nav-bar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; background: rgba(255,255,255,0.5); border-radius: 10px; z-index: 2001; }
     </style>
 </head>
 <body>
@@ -85,14 +43,14 @@
     </div>
 
     <div id="camera-app">
-        <video id="v" autoplay playsinline></video>
+        <div id="auth-btn" onclick="startStream()">点此授权并启动相机</div>
+        <video id="v" autoplay playsinline muted></video>
         <div class="controls">
             <div id="prev-box" onclick="saveMe()"></div>
             <div class="shutter" onclick="snap()"><div class="shutter-inner"></div></div>
             <div style="color:white; font-size:28px;" onclick="switchCam()">🔄</div>
         </div>
     </div>
-
     <div id="nav-bar" onclick="closeCam()"></div>
 </div>
 
@@ -100,20 +58,29 @@
     const app = document.getElementById('camera-app');
     const v = document.getElementById('v');
     const home = document.getElementById('home');
+    const authBtn = document.getElementById('auth-btn');
     let stream = null;
     let isRear = true;
     let photoData = null;
     let anim = null;
 
-    async function startCam() {
+    async function startStream() {
+        authBtn.style.display = 'none';
         if(stream) stream.getTracks().forEach(t => t.stop());
+        
+        const constraints = {
+            video: { facingMode: isRear ? "environment" : "user" }
+        };
+
         try {
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: isRear ? "environment" : "user" }
-            });
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
             v.srcObject = stream;
+            // 确保视频开始播放
+            v.onloadedmetadata = () => v.play();
         } catch(e) {
-            alert("请通过 HTTPS 访问并授予相机权限！");
+            console.error(e);
+            authBtn.style.display = 'block';
+            authBtn.innerText = "授权失败，请点击重试";
         }
     }
 
@@ -129,7 +96,8 @@
             { clipPath: `circle(150% at 50% 50%)`, opacity: 1 }
         ], { duration: 500, easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)', fill: 'forwards' });
 
-        startCam();
+        // 延迟 300ms 启动，防止动画卡顿
+        setTimeout(startStream, 300);
     }
 
     function snap() {
@@ -144,10 +112,10 @@
     function saveMe() {
         if(!photoData) return;
         const a = document.createElement('a');
-        a.href = photoData; a.download = 'capture.png'; a.click();
+        a.href = photoData; a.download = 'android_16_photo.png'; a.click();
     }
 
-    function switchCam() { isRear = !isRear; startCam(); }
+    function switchCam() { isRear = !isRear; startStream(); }
 
     function closeCam() {
         if(anim) {
@@ -156,12 +124,14 @@
             anim.onfinish = () => {
                 if(anim.playbackRate < 0) {
                     app.style.display = 'none';
-                    if(stream) stream.getTracks().forEach(t => t.stop());
+                    if(stream) {
+                        stream.getTracks().forEach(t => t.stop());
+                        stream = null;
+                    }
                 }
             };
         }
     }
 </script>
-
 </body>
 </html>
